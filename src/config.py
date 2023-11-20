@@ -1,4 +1,4 @@
 class Config:
     DEBUG = True
     PORT = 8080
-    HOST = 'localhost'
+    HOST = '192.168.15.9'

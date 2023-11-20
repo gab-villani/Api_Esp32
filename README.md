@@ -1,6 +1,6 @@
 **Comandos :**
 ```sh
-pip install fastapi[all] requests
-pip install pillow
+pip install fastapi[all] requests pillow
+
 
 ```
