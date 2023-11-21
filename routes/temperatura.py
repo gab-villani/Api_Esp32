@@ -1,18 +1,17 @@
-from fastapi import FastAPI,Request
-
+from fastapi import APIRouter,Request
 
 tempe_c = None
 viscosidade = None
 massa_espe = None
 
 
-class Temperatura:
-    app_tempe = FastAPI()
+Router_temp = APIRouter()
 
-    @app_tempe.post('/api/temperatura', status_code=200)
-    async def temperatura(request: Request):
+@Router_temp.post('/incluir_temperatura', status_code=200,tags=['temperatura'])
+async def temperatura(request: Request):
         global tempe_c
         tempe_c = await request.json()
         print("temperatura", tempe_c)
+
         return tempe_c
             

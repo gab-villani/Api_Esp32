@@ -1,62 +1,47 @@
-# main.py
-import tkinter as tk
-from tkinter import ttk
 from fastapi.middleware.cors import CORSMiddleware
-import requests
 from src.config import Config
 import threading
+from fastapi import FastAPI
+import uvicorn
+import tkinter as tk
+from app import MyApp
+from routes.temperatura import Router_temp
 
-class MyApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Tkinter with FastAPI")
-        self.root.geometry('550x400')
+# Criação da instância FastAPI
+fastapi_app = FastAPI(
+    title="Api Instrumentacao",
+    description="Telemetria",
+    version="1.0.0",
+)
 
-        self.label = ttk.Label(root, text="API Response:")
-        self.label.pack(pady=10)
+# Configuração do CORS
+origins = ["*"]
+fastapi_app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-        self.tempe_label = ttk.Label(root, text="Temperatura:")
-        self.tempe_label.pack(pady=10)
+# Adição das rotas
+fastapi_app.include_router(Router_temp, prefix='/api/temperatura')
 
-        self.button = ttk.Button(root, text="Call API", command=self.call_api)
-        self.button.pack(pady=10)
-
-        # Atualiza a temperatura a cada 1000 milissegundos (1 segundo)
-        self.root.after(1000, self.update_tempe_label)
-
-    def call_api(self):
-        response = requests.post(f'http://{Config.HOST}:{Config.PORT+1}/api/temperatura', json={"tempe_c": 25.5})
-        data = response.json()
-        self.label.config(text=f"API Response: {data}")
-
-    def update_tempe_label(self):
-        from routes.temperatura import tempe_c
-        if tempe_c is not None:
-            self.tempe_label.config(text=f"Temperatura: {tempe_c}")
-            self.root.after(1000, self.update_tempe_label)
-
-if __name__ == "__main__":
-    from fastapi import FastAPI
-    from routes.temperatura import Temperatura
-    import uvicorn
-    import threading
-    app_tempe = Temperatura.app_tempe
-    # Run the API using uvicorn in a separate thread
-    api_thread_tempe = threading.Thread(target=uvicorn.run, kwargs={'app': app_tempe, 'host': Config.HOST, 'port': Config.PORT+1})
-    api_thread_tempe.start()
-
-    # Run the Tkinter app
+# Função para iniciar o mainloop do Tkinter
+def start_tkinter():
     root = tk.Tk()
-    app = MyApp(root)
-
-    # Configuração do CORS para permitir solicitações de qualquer origem
-    origins = ["*"]
-    app_tempe.add_middleware(
-        CORSMiddleware,
-        allow_origins=origins,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
-    
+    my_app_instance = MyApp(root)
     root.mainloop()
+
+# Inicialização da thread para o FastAPI
+fastapi_thread = threading.Thread(
+    target=uvicorn.run,
+    kwargs={'app': fastapi_app, 'host': Config.HOST, 'port': Config.PORT + 1}
+)
+
+# Inicialização da thread para a aplicação Tkinter
+tkinter_thread = threading.Thread(target=start_tkinter)
+
+# Inicialização simultânea das duas threads
+fastapi_thread.start()
+tkinter_thread.start()
