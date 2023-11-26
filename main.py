@@ -4,8 +4,8 @@ import threading
 from fastapi import FastAPI
 import uvicorn
 import tkinter as tk
-from app import MyApp
-from routes.temperatura import Router_temp
+from src.app import MyApp
+from routes.route import Router
 
 # Criação da instância FastAPI
 fastapi_app = FastAPI(
@@ -25,7 +25,7 @@ fastapi_app.add_middleware(
 )
 
 # Adição das rotas
-fastapi_app.include_router(Router_temp, prefix='/api/temperatura')
+fastapi_app.include_router(Router, prefix='/api')
 
 # Função para iniciar o mainloop do Tkinter
 def start_tkinter():
