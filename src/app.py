@@ -2,8 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 from routes.route import tempe_c, vazao, rotacao, forca, pressao
 from routes.temperatura import propriedades_agua
-from src.config import Config
-
 class MyApp:
     def __init__(self, root):
         self.root = root
